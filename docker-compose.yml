@@ -30,7 +30,7 @@ services:
       - '${ROOT_FOLDER}/postgres/data:/var/lib/postgresql/data'
 
   postgrest:
-    image: 'valentinvieriu/booksclub:postgrest-4.2.0'
+    image: 'valentinvieriu/booksclub:postgrest-0.4.4.0'
     restart: 'always'
     depends_on:
       - 'postgres'
