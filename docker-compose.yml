@@ -93,9 +93,9 @@ services:
       - 'traefik.frontend.rule=Host:api.${TLD}'
 
   booksclub:
-    image: 'valentinvieriu/booksclub:booksclub-1.0.5'
+    image: 'valentinvieriu/booksclub:booksclub-1.0.7'
     restart: 'always'
-    scale: 2
+    scale: 1
     depends_on:
       - 'api-proxy'
       - 'api-cache'
@@ -113,8 +113,6 @@ services:
       - 'traefik.frontend.rule=Host:
         ${TLD},
         www.${TLD},
-        www.carteapenet.ro,
-        carteapenet.ro,
         aubooks.club,
         hkbooks.club,
         iebooks.club,
@@ -124,6 +122,27 @@ services:
         sydneybooks.club,
         ukbooks.club,
         zabooks.club'
+
+  carteapenet:
+    image: 'valentinvieriu/booksclub:booksclub-1.0.7'
+    restart: 'always'
+    scale: 1
+    depends_on:
+      - 'api-proxy'
+      - 'api-cache'
+    networks:
+      - 'internal'
+      - 'proxy'
+    environment: 
+      NODE_ENV: 'production'
+      APPNAME: 'carteapenet'
+      API_URL: 'http://api-cache'
+      PORT: '3000'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'traefik.port=3000'
+      - 'traefik.frontend.rule=Host:carteapenet.ro,www.carteapenet.ro'
 
   # kue:
   #   image: 'valentinvieriu/booksclub:kue-1.0.2'
@@ -180,7 +199,7 @@ services:
       - 'traefik.frontend.rule=Host:mqtt.${TLD}'
 
   portainer:
-    image: 'portainer/portainer:1.16.3'
+    image: 'portainer/portainer:1.17.1'
     networks:
       - 'proxy'
     restart: 'always'
@@ -199,7 +218,7 @@ services:
       - 'traefik.frontend.auth.basic=${GENERAL_PASSWORD}'
 
   traefik:
-    image: 'traefik:1.5.3'
+    image: 'traefik:1.6.2'
     networks:
       - 'proxy'
       - 'internal'
