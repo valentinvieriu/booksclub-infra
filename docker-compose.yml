@@ -66,6 +66,7 @@ services:
       REDIS_URL: '${REDIS_URL}'
       USE_CLUSTER: 'true'
       IS_WORKER: 'false'
+      API_KEY: ${API_KEY}
     labels:
       # - 'traefik.enable=true'
       - 'traefik.docker.network=proxy'
@@ -92,7 +93,7 @@ services:
       - 'traefik.frontend.rule=Host:api.${TLD}'
 
   bookrepublic:
-    image: 'valentinvieriu/booksclub:booksclub-1.1.4'
+    image: 'valentinvieriu/booksclub:booksclub-1.1.6'
     restart: 'always'
     scale: 1
     depends_on:
