@@ -7,26 +7,26 @@ networks:
     external: true
 services:
 
-  # redis:
-  #   image: 'redis:4.0.8-alpine'
-  #   networks:
-  #     - 'internal'
-  #   restart: 'always'
-  #   command: 'redis-server --requirepass ${REDIS_PASSWORD}'
-  #   volumes:
-  #     - '${ROOT_FOLDER}/redis/data:/data'
-  #   # ports: 
-  #   #   - '6379:6379'
+  redis:
+    image: 'redis:4-alpine'
+    networks:
+      - 'internal'
+    restart: 'always'
+    command: 'redis-server --requirepass ${REDIS_PASSWORD}'
+    volumes:
+      - '${ROOT_FOLDER}/redis/data:/data'
+    # ports: 
+    #   - '6379:6379'
 
-  # postgres:
-  #   image: 'postgres:9.6.8-alpine'
-  #   networks:
-  #     - 'internal'
-  #   restart: 'always'
-  #   environment: 
-  #     POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
-  #   volumes:
-  #     - '${ROOT_FOLDER}/postgres/data:/var/lib/postgresql/data'
+  postgres:
+    image: 'postgres:9-alpine'
+    networks:
+      - 'internal'
+    restart: 'always'
+    environment: 
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+    volumes:
+      - '${ROOT_FOLDER}/postgres/data:/var/lib/postgresql/data'
 
   postgrest:
     image: 'valentinvieriu/booksclub:postgrest-0.4.4.0'
@@ -93,7 +93,7 @@ services:
       - 'traefik.frontend.rule=Host:api.${TLD}'
 
   bookrepublic:
-    image: 'valentinvieriu/booksclub:booksclub-1.1.6'
+    image: 'valentinvieriu/booksclub:booksclub-1.1.7'
     restart: 'always'
     scale: 1
     depends_on:
@@ -112,19 +112,7 @@ services:
       - 'traefik.port=3000'
       - 'traefik.frontend.rule=Host:
         ${TLD},
-        www.${TLD},
-        booksclub.space,
-        aubooks.club,
-        hkbooks.club,
-        iebooks.club,
-        malaybooks.club,
-        nzbooks.club,
-        sgbooks.club,
-        sydneybooks.club,
-        ukbooks.club,
-        zabooks.club,
-        carteapenet.ro,
-        www.carteapenet.ro'
+        www.${TLD}'
 
   # carteapenet:
   #   image: 'valentinvieriu/booksclub:booksclub-1.0.8'
@@ -181,87 +169,87 @@ services:
     labels:
       - 'traefik.enable=false'
       
-  # mqtt:
-  #   image: 'valentinvieriu/alpine-mosquitto:1.4.14'
-  #   networks:
-  #     - 'proxy'
-  #     - 'internal'
-  #   restart: 'always'
-  #   mem_limit: '128M'
-  #   ports:
-  #     - '1883:1883'
-  #     # - '9001:9001'
-  #   volumes: 
-  #     - '${ROOT_FOLDER}/mqtt:/data'
-  #   labels:
-  #     - 'traefik.enable=true'
-  #     - 'traefik.docker.network=proxy'
-  #     - 'traefik.port=9001'
-  #     - 'traefik.default.protocol=ws'
-  #     - 'traefik.frontend.rule=PathPrefixStrip:/mqt'
-  #     - 'traefik.frontend.rule=Host:mqtt.${TLD}'
+  mqtt:
+    image: 'valentinvieriu/alpine-mosquitto:1.4.14'
+    networks:
+      - 'proxy'
+      - 'internal'
+    restart: 'always'
+    mem_limit: '128M'
+    ports:
+      - '1883:1883'
+      # - '9001:9001'
+    volumes: 
+      - '${ROOT_FOLDER}/mqtt:/data'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'traefik.port=9001'
+      - 'traefik.default.protocol=ws'
+      - 'traefik.frontend.rule=PathPrefixStrip:/mqt'
+      - 'traefik.frontend.rule=Host:mqtt.${TLD}'
 
-  # portainer:
-  #   image: 'portainer/portainer:1.17.1'
-  #   networks:
-  #     - 'proxy'
-  #   restart: 'always'
-  #   mem_limit: '64M'
-  #   command: '--no-auth'
-  #   volumes: 
-  #     - '/var/run/docker.sock:/var/run/docker.sock'
-  #     - '${ROOT_FOLDER}/portainer/data:/data'
-  #   environment:
-  #     NODE_ENV: 'production'
-  #   labels:
-  #     - 'traefik.enable=true'
-  #     - 'traefik.docker.network=proxy'
-  #     - 'traefik.port=9000'
-  #     - 'traefik.frontend.rule=Host:portainer.${TLD}'
-  #     - 'traefik.frontend.auth.basic=${GENERAL_PASSWORD}'
+  portainer:
+    image: 'portainer/portainer:1.20.1'
+    networks:
+      - 'proxy'
+    restart: 'always'
+    mem_limit: '64M'
+    command: '--no-auth'
+    volumes: 
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '${ROOT_FOLDER}/portainer/data:/data'
+    environment:
+      NODE_ENV: 'production'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'traefik.port=9000'
+      - 'traefik.frontend.rule=Host:portainer.${TLD}'
+      - 'traefik.frontend.auth.basic=${GENERAL_PASSWORD}'
 
-  # traefik:
-  #   image: 'traefik:1.6.2'
-  #   networks:
-  #     - 'proxy'
-  #     - 'internal'
-  #   restart: 'always'
-  #   command: 
-  #     # - '--api'
-  #     - '--web'
-  #     - '--logLevel=DEBUG'
-  #     - '--entrypoints=Name:http Address::80 Redirect.EntryPoint:https'
-  #     - '--entrypoints=Name:https Address::443 TLS'
-  #     - '--defaultentrypoints=http,https'
-  #     - '--acme'
-  #     - '--acme.acmelogging=true'
-  #     - '--acme.storage=/etc/traefik/acme.json'
-  #     - '--acme.entryPoint=https'
-  #     - '--acme.httpChallenge.entryPoint=http'
-  #     - '--acme.OnHostRule=true'
-  #     - '--acme.onDemand=false'
-  #     - '--acme.email=valentin.vieriu@gmail.com'
-  #     # - '--acme.caServer=https://acme-staging.api.letsencrypt.org/directory'
-  #     - '--docker'
-  #     # - '--docker.swarmmode'
-  #     - '--docker.domain=${TLD}'
-  #     - '--docker.watch'  
-  #     - '--docker.exposedByDefault=false'
-  #   ports:
-  #     - '80:80'
-  #     - '443:443'
-  #     # - '8080:8080'
-  #   volumes:
-  #     - '/var/run/docker.sock:/var/run/docker.sock'
-  #     - '${ROOT_FOLDER}/traefik:/etc/traefik'
-  #     # - '${ROOT_FOLDER}/data/traefik.toml:/etc/traefik/traefik.toml'
-  #     # - '${ROOT_FOLDER}/data/acme.json:/etc/traefik/acme.json'
-  #   # environment: 
-  #     # DEBUG: 'true'
-  #   labels:
-  #     - 'traefik.enable=true'
-  #     - 'traefik.docker.network=proxy'
-  #     - 'traefik.port=8080'
-  #     # - 'traefik.default.protocol=https'
-  #     - 'traefik.frontend.rule=Host:traefik.${TLD}'
-  #     - 'traefik.frontend.auth.basic=${GENERAL_PASSWORD}'
+  traefik:
+    image: 'traefik:1.7.9'
+    networks:
+      - 'proxy'
+      - 'internal'
+    restart: 'always'
+    command: 
+      # - '--api'
+      - '--web'
+      - '--logLevel=DEBUG'
+      - '--entrypoints=Name:http Address::80 Redirect.EntryPoint:https'
+      - '--entrypoints=Name:https Address::443 TLS'
+      - '--defaultentrypoints=http,https'
+      - '--acme'
+      - '--acme.acmelogging=true'
+      - '--acme.storage=/etc/traefik/acme.json'
+      - '--acme.entryPoint=https'
+      - '--acme.httpChallenge.entryPoint=http'
+      - '--acme.OnHostRule=true'
+      - '--acme.onDemand=false'
+      - '--acme.email=valentin.vieriu@gmail.com'
+      # - '--acme.caServer=https://acme-staging.api.letsencrypt.org/directory'
+      - '--docker'
+      # - '--docker.swarmmode'
+      - '--docker.domain=${TLD}'
+      - '--docker.watch'  
+      - '--docker.exposedByDefault=false'
+    ports:
+      - '80:80'
+      - '443:443'
+      # - '8080:8080'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '${ROOT_FOLDER}/traefik:/etc/traefik'
+      # - '${ROOT_FOLDER}/data/traefik.toml:/etc/traefik/traefik.toml'
+      # - '${ROOT_FOLDER}/data/acme.json:/etc/traefik/acme.json'
+    # environment: 
+      # DEBUG: 'true'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'traefik.port=8080'
+      # - 'traefik.default.protocol=https'
+      - 'traefik.frontend.rule=Host:traefik.${TLD}'
+      - 'traefik.frontend.auth.basic=${GENERAL_PASSWORD}'
