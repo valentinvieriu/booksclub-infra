@@ -7,16 +7,16 @@ networks:
     external: true
 services:
 
-  redis:
-    image: 'redis:4-alpine'
-    networks:
-      - 'internal'
-    restart: 'always'
-    command: 'redis-server --requirepass ${REDIS_PASSWORD}'
-    volumes:
-      - '${ROOT_FOLDER}/redis/data:/data'
-    # ports: 
-    #   - '6379:6379'
+  # redis:
+  #   image: 'redis:4-alpine'
+  #   networks:
+  #     - 'internal'
+  #   restart: 'always'
+  #   command: 'redis-server --requirepass ${REDIS_PASSWORD}'
+  #   volumes:
+  #     - '${ROOT_FOLDER}/redis/data:/data'
+  #   # ports: 
+  #   #   - '6379:6379'
 
   postgres:
     image: 'postgres:9-alpine'
@@ -51,7 +51,7 @@ services:
       # - 'traefik.frontend.auth.basic=${GENERAL_PASSWORD}'
 
   api-proxy:
-    image: 'valentinvieriu/booksclub:api-proxy-1.0.3'
+    image: 'valentinvieriu/booksclub:api-proxy-1.0.4'
     restart: 'always'
     depends_on:
       # - 'redis'
@@ -74,7 +74,7 @@ services:
       # - 'traefik.frontend.rule=Host:api-proxy.${TLD}'
 
   api-cache:
-    image: 'valentinvieriu/booksclub:api-cache-1.0.1'
+    image: 'valentinvieriu/booksclub:api-cache-1.1.1'
     restart: 'always'
     depends_on:
       - 'api-proxy'
@@ -93,7 +93,7 @@ services:
       - 'traefik.frontend.rule=Host:api.${TLD}'
 
   bookrepublic:
-    image: 'valentinvieriu/booksclub:booksclub-1.1.7'
+    image: 'valentinvieriu/booksclub:booksclub-1.1.9'
     restart: 'always'
     scale: 1
     depends_on:
@@ -155,39 +155,39 @@ services:
   #     - 'traefik.frontend.rule=Host:kue.${TLD}'
   #     - 'traefik.frontend.auth.basic=${GENERAL_PASSWORD}'
 
-  chat-bot:
-    image: 'valentinvieriu/booksclub:chatbot-1.0.3'
-    networks:
-      # - 'proxy'
-      - 'internal'
-    # depends_on:
-    #   - mqtt
-    restart: 'always'
-    mem_limit: '128M'
-    environment:
-      - 'MQTT_SERVER=mqtt'
-    labels:
-      - 'traefik.enable=false'
+  # chat-bot:
+  #   image: 'valentinvieriu/booksclub:chatbot-1.0.3'
+  #   networks:
+  #     # - 'proxy'
+  #     - 'internal'
+  #   # depends_on:
+  #   #   - mqtt
+  #   restart: 'always'
+  #   mem_limit: '128M'
+  #   environment:
+  #     - 'MQTT_SERVER=mqtt'
+  #   labels:
+  #     - 'traefik.enable=false'
       
-  mqtt:
-    image: 'valentinvieriu/alpine-mosquitto:1.4.14'
-    networks:
-      - 'proxy'
-      - 'internal'
-    restart: 'always'
-    mem_limit: '128M'
-    ports:
-      - '1883:1883'
-      # - '9001:9001'
-    volumes: 
-      - '${ROOT_FOLDER}/mqtt:/data'
-    labels:
-      - 'traefik.enable=true'
-      - 'traefik.docker.network=proxy'
-      - 'traefik.port=9001'
-      - 'traefik.default.protocol=ws'
-      - 'traefik.frontend.rule=PathPrefixStrip:/mqt'
-      - 'traefik.frontend.rule=Host:mqtt.${TLD}'
+  # mqtt:
+  #   image: 'valentinvieriu/alpine-mosquitto:1.4.14'
+  #   networks:
+  #     - 'proxy'
+  #     - 'internal'
+  #   restart: 'always'
+  #   mem_limit: '128M'
+  #   ports:
+  #     - '1883:1883'
+  #     # - '9001:9001'
+  #   volumes: 
+  #     - '${ROOT_FOLDER}/mqtt:/data'
+  #   labels:
+  #     - 'traefik.enable=true'
+  #     - 'traefik.docker.network=proxy'
+  #     - 'traefik.port=9001'
+  #     - 'traefik.default.protocol=ws'
+  #     - 'traefik.frontend.rule=PathPrefixStrip:/mqt'
+  #     - 'traefik.frontend.rule=Host:mqtt.${TLD}'
 
   portainer:
     image: 'portainer/portainer:1.20.1'
